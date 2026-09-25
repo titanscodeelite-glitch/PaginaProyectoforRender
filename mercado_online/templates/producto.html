@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row bg-white p-4 rounded shadow-sm">
+    <div class="col-md-6">
+        <img src="{{ url_for('static', filename='uploads/' + producto.imagen) }}" class="img-fluid rounded shadow-sm w-100" style="max-height: 400px; object-fit: cover;" alt="{{ producto.nombre }}">
+    </div>
+    <div class="col-md-6 d-flex flex-column justify-content-between">
+        <div>
+            <span class="badge bg-info text-dark mb-2">{{ producto.categoria }}</span>
+            <h2 class="fw-bold">{{ producto.nombre }}</h2>
+            <p class="text-muted">Vendido por: <span class="fw-semibold">{{ producto.vendedor.nombre }}</span></p>
+            <h3 class="text-success fw-bold my-3">${{ "%.2f"|format(producto.precio) }}</h3>
+            <p class="text-secondary">{{ producto.descripcion }}</p>
+            <p class="small">Stock disponible: <span class="fw-bold {% if producto.stock > 0 %}text-success{% else %}text-danger{% endif %}">{{ producto.stock }} unidades</span></p>
+        </div>
+
+        {% if producto.stock > 0 and (not current_user.is_authenticated or not current_user.es_admin) %}
+        <form action="{{ url_for('agregar_carrito', id=producto.id) }}" method="POST" class="mt-4">
+            <div class="input-group mb-3" style="max-width: 200px;">
+                <input type="number" name="cantidad" value="1" min="1" max="{{ producto.stock }}" class="form-control text-center">
+                <button class="btn btn-warning" type="submit"><i class="fa-solid fa-cart-plus"></i> Agregar</button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Sección de Reseñas -->
+<div class="row mt-5">
+    <div class="col-md-8">
+        <h4 class="fw-bold mb-3">Reseñas y Valoraciones</h4>
+        {% for review in producto.reviews %}
+        <div class="card mb-3 border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h6 class="fw-bold mb-1">{{ review.usuario.nombre }}</h6>
+                    <span class="text-warning">
+                        {% for i in range(review.calificacion) %}★{% endfor %}
+                    </span>
+                </div>
+                <p class="text-muted small mb-0">{{ review.comentario }}</p>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-muted">Este producto aún no tiene reseñas.</p>
+        {% endfor %}
+
+        {% if current_user.is_authenticated and not current_user.es_admin %}
+        <div class="card border-0 shadow-sm mt-4 p-3 bg-light">
+            <h5 class="fw-bold mb-3">Deja tu reseña</h5>
+            <form action="{{ url_for('detalle_producto', id=producto.id) }}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Calificación (Estrellas)</label>
+                    <select name="calificacion" class="form-select" required>
+                        <option value="5">★★★★★ (5/5)</option>
+                        <option value="4">★★★★☆ (4/5)</option>
+                        <option value="3">★★★☆☆ (3/5)</option>
+                        <option value="2">★★☆☆☆ (2/5)</option>
+                        <option value="1">★☆☆☆☆ (1/5)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Comentario</label>
+                    <textarea name="comentario" rows="3" class="form-control" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-dark">Publicar Reseña</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

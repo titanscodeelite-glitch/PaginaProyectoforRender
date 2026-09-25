@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="fw-bold mb-4">Mis Pedidos Realizados</h2>
+{% for pedido in pedidos %}
+<div class="card shadow-sm border-0 mb-3 p-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="fw-bold mb-0">Pedido #{{ pedido.id }}</h5>
+        <span class="badge bg-success">{{ pedido.estado }}</span>
+    </div>
+    <p class="text-muted small mb-2">Fecha: {{ pedido.fecha }}</p>
+    <ul class="list-group list-group-flush mb-2">
+        {% for item in pedido.items %}
+        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+            <span>{{ item.producto.nombre }} (x{{ item.cantidad }})</span>
+            <span>${{ "%.2f"|format(item.precio_unitario * item.cantidad) }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+    <div class="text-end fw-bold fs-5 text-success">Total: ${{ "%.2f"|format(pedido.total) }}</div>
+</div>
+{% else %}
+<p class="text-muted">Aún no has realizado ninguna compra.</p>
+{% endfor %}
+{% endblock %}
